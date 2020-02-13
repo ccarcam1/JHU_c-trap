@@ -24,7 +24,7 @@ def timeprogression(time,numsteps):
 
 #MAIN ------------------------------------------
 print("starting high pressure")
-setpressure(1.1)
+setpressure(1.4)
 fluidics.open(1,2,3,4,5,6)
 timeprogression(60*3,3)
 
