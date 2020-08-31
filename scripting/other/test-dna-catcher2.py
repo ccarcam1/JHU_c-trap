@@ -6,22 +6,23 @@ import numpy as np
 
 trap = Trap("1", "XY")
 pt=0.1
-echannel=1 #change this to 1 if you want to end in an experiment channel
-dnadwell=1 #how long to dwell in dna channel (sec)
-
+echannel=0 #change this to 1 if you want to end in an experiment channel
+dnadwell=1.5 #how long to dwell in dna channel (sec)
+dist1pp = 1.6 
+# dist1pp = 10
 #functions that we need to catch DNA
 def pingpongforce():
-    trap.move_by(dx=10,speed=5.5)
+    trap.move_by(dx=(10+dist1pp),speed=5.5)
     ppf=trap.current_force
-    trap.move_by(dx=-10,speed=6.5)
+    trap.move_by(dx=-(dist1pp+10),speed=6.5)
     return ppf
 
 def pingpongforce2():
-    trap.move_by(dx=9,speed=5.5)
+    trap.move_by(dx=(9+dist1pp),speed=5.5)
     ppf1=trap.current_force
     move_by2(1.2,5.5)
     ppf2=trap.current_force
-    trap.move_by(dx=-10.2,speed=6.5)
+    trap.move_by(dx=-(10.2+dist1pp),speed=6.5)
     print("  "+str(round(ppf1,2))+" to "+str(round(ppf2,2)))
     if (ppf1*0.77)>ppf2 or ppf2>(ppf1*1.23):
         return 1
@@ -34,14 +35,14 @@ def move_by2(x,s): #to print the force every 0.1 step increment
         print(round(trap.current_force,2))
 
 def gohome():
-    trap.move_to(waypoint="catch DNA",speed=7)
+    trap.move_to(waypoint="Point 1",speed=6)
     print("trap1 bead is home")
 
 def pressurecycle():
     while fluidics.pressure < .6:
         fluidics.increase_pressure()
         pause(pt) #important!
-    while fluidics.pressure > 0.22:
+    while fluidics.pressure > 0.4:
         fluidics.decrease_pressure()
         pause(pt) #important!
     print("pressure cycled")
@@ -126,7 +127,7 @@ def themainloop(): #will return 1 if caught, 0 if attempted 60 times and failed
 
     # set up the pressure
     stage.move_to("buffer")
-    setpressure(0.22)
+    setpressure(0.4)
 
     #set traps at initial position and reset force
     gohome()
@@ -142,8 +143,9 @@ def themainloop(): #will return 1 if caught, 0 if attempted 60 times and failed
         stage.move_to("DNA")
         pause(dnadwell)
         stage.move_to("buffer")
+        pause(dnadwell)
         caught=pingpongforce2();
-        if attempts==30:
+        if attempts==15:
             return 0
         if (attempts%10)==0:
             pressurecycle()
@@ -177,5 +179,5 @@ print("in the buffer channel with all reset")
 #if want to move to ch4 to ready for experiment start
 if echannel==1:
     movetoch4()
-    trap.move_to(waypoint="stretched",speed=3)
+    trap.move_to(waypoint="Point 2",speed=3)
     print('ready to image!')
